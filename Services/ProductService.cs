@@ -10,6 +10,7 @@ namespace AgreementManagement.Services
     public interface IProductService
     {
         Task<IList<Product>> GetProductsByGroupId(int groupId);
+        Task<Product> GetProductsById(int id);
     }
 
     public class ProductService : IProductService
@@ -36,6 +37,16 @@ namespace AgreementManagement.Services
         public async Task<IList<Product>> GetProductsByGroupId(int groupId)
         {
             return await _productEntity.Where(p => p.ProductGroupId == groupId).ToListAsync();
+        }
+
+        /// <summary>
+        /// Get product by id
+        /// </summary>
+        /// <param name="id">product identity</param>
+        /// <returns>Product entity</returns>
+        public async Task<Product> GetProductsById(int id)
+        {
+            return await _productEntity.FirstOrDefaultAsync(p => p.Id == id);
         }
 
         #endregion

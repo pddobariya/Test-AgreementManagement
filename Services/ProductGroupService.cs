@@ -9,6 +9,7 @@ namespace AgreementManagement.Services
     public interface IProductGroupService
     {
         Task<IList<ProductGroup>> GetProductGroups();
+        Task<ProductGroup> GetProductGroupById(int id);
     }
     public class ProductGroupService : IProductGroupService
     {
@@ -33,6 +34,19 @@ namespace AgreementManagement.Services
         public async Task<IList<ProductGroup>> GetProductGroups()
         {
             return await _productGroupEntity.ToListAsync();
+        }
+
+        /// <summary>
+        /// Get product group by od
+        /// </summary>
+        /// <param name="id">product group identity</param>
+        /// <returns>product group entity</returns>
+        public async Task<ProductGroup> GetProductGroupById(int id)
+        {
+            if (id == 0)
+                return null;
+
+            return await _productGroupEntity.FirstOrDefaultAsync(p => p.Id == id);
         }
         #endregion
 

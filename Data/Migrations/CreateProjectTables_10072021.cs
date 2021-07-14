@@ -83,6 +83,20 @@ namespace AgreementManagement.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                 });
+
+            migrationBuilder.InsertData(table: "ProductGroup", columns: new[] { "GroupDescription", "GroupCode", "Active" }, values: new object[] { "Group 1", "Code1", true });
+            migrationBuilder.InsertData(table: "ProductGroup", columns: new[] { "GroupDescription", "GroupCode", "Active" }, values: new object[] { "Group 2", "Code2", true });
+            migrationBuilder.InsertData(table: "ProductGroup", columns: new[] { "GroupDescription", "GroupCode", "Active" }, values: new object[] { "Group 3", "Code3", true });
+
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 1, "Product description1", "P-1",10,true });
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 1, "Product description2", "P-2", 15, true });
+
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 2, "Product description11", "P-3", 25, true });
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 2, "Product description22", "P-4", 20, true });
+
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description31", "P-5", 21, true });
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description32", "P-6", 22, true });
+            migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description33", "P-7", 23, true });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

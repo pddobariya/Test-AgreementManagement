@@ -1,4 +1,5 @@
 using AgreementManagement.Data;
+using AgreementManagement.Factories;
 using AgreementManagement.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,10 @@ namespace AgreementManagement
             // Add application services.
             services.AddTransient<IProductGroupService, ProductGroupService>();
             services.AddTransient<IProductService, ProductService>();
+            services.AddTransient<IAgreementService, AgreementService>();
+            
+            // Add application factories
+            services.AddTransient<IAgreementFactory, AgreementFactory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

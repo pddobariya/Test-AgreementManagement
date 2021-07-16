@@ -17,5 +17,6 @@ namespace AgreementManagement.Domain
         public DateTime ExpirationDate { get; set; }
         public decimal ProductPrice { get; set; }
         public decimal NewPrice { get; set; }
+        public bool Active { get; set; }
     }
 }

@@ -13,22 +13,37 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <a class="btn btn-primary popup" data-url="Home/NewAgreement" data-toggle="modal" data-target="#modal-create-edit-user" id="UserModel">Add New User <i class="fa fa-plus"></i></a>
-    <!-- Button trigger modal -->
-    <!--<button type="button" id="addnew" class="btn btn-primary" data-url="Home/NewAgreement" data-toggle="modal" data-target="#modal-create-edit-aggrement">
-        Add edit Agreement
-    </button>-->
+
+    <a onclick="ShowPopup(0)" class="btn btn-primary popup" data-toggle="modal" data-target="#modal-create-edit-user">Add New User <i class="fa fa-plus"></i></a>
 
     <div aria-hidden="true" aria-labelledby="modal-create-edit-user-label" role="dialog" tabindex="-1" id="modal-create-edit-user" class="modal fade">
         <div class="modal-dialog">
-            <div class="modal-content" id="modal-aggrement">
-
+            <div class="modal-content">
+                <form id="needs-validation" novalidate asp-action="NewAgreement" asp-controller="Home">
+                    <div class="card-header bg-primary text-white modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Edit Agreement</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="card-body" id="modal-aggrement">
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-xs-12">
+                                <div class="float-right">
+                                    <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">Close</button>
+                                    <button class="btn btn-primary rounded-0" type="submit">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-
-    <table id="agreementList" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+    <table id="agreementList" class="table table-striped table-bordered" width="100%" cellspacing="0">
         <thead>
             <tr>
                 <th>ProductGroupName</th>
@@ -37,6 +52,7 @@
                 <th>ExpirationDate</th>
                 <th>ProductPrice</th>
                 <th>NewPrice</th>
+                <th>Active</th>
                 <th>Edit</th>
                 <th>Delete</th>
             </tr>
@@ -44,37 +60,41 @@
     </table>
     @section scripts{
         <script>
-            (function ($) {
-                function Index() {
-                    var $this = this;
-                    function initialize() {
-
-                        $(".popup").on('click', function (e) {
-                            modelPopup(this);
-                        });
-
-                        function modelPopup(reff) {
-                            var url = $(reff).data('url');
-
-                            $.get(url).done(function (data) {
-                                $('#modal-create-edit-user').find("#modal-aggrement").html(data);
-                                $('#modal-create-edit-user > .modal', data).modal("show");
-                            });
-
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    var form = document.getElementById('needs-validation');
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
                         }
-                    }
+                        form.classList.add('was-validated');
+                    }, false);
+                }, false);
+            })();
 
-                    $this.init = function () {
-                        initialize();
-                    };
-                }
-                $(function () {
-                    var self = new Index();
-                    self.init();
-                });
-            }(jQuery));
 
+            function ShowPopup(id) {
+                $.ajax(
+                    {
+                        type: "GET",
+                        url: "Home/AddEditAgreement?id="+id,
+                        success: function (response) {
+                            debugger;
+                            $('#modal-create-edit-user').find("#modal-aggrement").html(response);
+                            $('#modal-create-edit-user').modal("show");
+                        },
+                    });
+            }
             $(document).ready(function () {
+                LoadAgreementData();
+            });
+
+            function LoadAgreementData() {
+                if ($.fn.DataTable.isDataTable("#agreementList")) {
+                    $('#agreementList').DataTable().clear().destroy();
+                }
                 $('#agreementList').DataTable({
                     "sPaginationType": "full_numbers",
                     "bProcessing": true,
@@ -82,10 +102,37 @@
                     aoColumns: [
                         { "data": "productGroupName", "sClass": "text-center", "sWidth": "10%" },
                         { "data": "productName", "sClass": "text-center", "sWidth": "10%" },
-                        { "data": "effectiveDate", "sClass": "text-center", "sWidth": "10%" },
-                        { "data": "expirationDate", "sClass": "text-center", "sWidth": "10%" },
+                        {
+                            "data": "effectiveDate", "sClass": "text-center", "sWidth": "10%",
+                            "mRender": function (data) {
+                                var date = new Date(data);
+                                var month = date.getMonth() + 1;
+                                return (month.length > 1 ? month : "0" + month) + "/" + date.getDate() + "/" + date.getFullYear();
+                            }
+                        },
+                        {
+                            "data": "expirationDate", "sClass": "text-center", "sWidth": "10%",
+                            "mRender": function (data) {
+                                var date = new Date(data);
+                                var month = date.getMonth() + 1;
+                                return (month.length > 1 ? month : "0" + month) + "/" + date.getDate() + "/" + date.getFullYear();
+                            }
+                        },
                         { "data": "productPrice", "sClass": "text-center", "sWidth": "10%" },
                         { "data": "newPrice", "sClass": "text-center", "sWidth": "10%" },
+                        {
+                            "data": "active", "sClass": "text-center", "sWidth": "10%",
+                            "bSearchable": false,
+                            "bSortable": false,
+                            "mRender": function (data, type, full) {
+                                var active = full["active"];
+                                str = '<p><i class="fa fa-check" aria-hidden="true"></i></p>'
+                                if (!active) {
+                                    str = '<p><i class="fa fa-times" aria-hidden="true"></i></p>'
+                                }
+                                return str;
+                            }
+                        },
                         {
                             "bSearchable": false,
                             "bSortable": false,
@@ -93,7 +140,7 @@
                             "sWidth": "10%",
                             "mRender": function (data, type, full) {
                                 var id = full["id"];
-                                str = '<a class="btn btn-info" href="/Home/Edit/' + id + '">Edit</a>';
+                                str = '<a onclick="ShowPopup(' + id + ')" class="btn btn-primary popup" data-toggle="modal" data-target="#modal-create-edit-user">Edit</a>'
                                 return str;
                             }
                         },
@@ -110,9 +157,7 @@
                         }
                     ]
                 });
-        });
-
-
+            }
         function DeleteData(CustomerID) {
             if (confirm("Are you sure you want to delete ...?")) {
                 Delete(CustomerID);
@@ -124,9 +169,8 @@
             var url = '@Url.Content("~/")' + "Home/Delete";
 
             $.post(url, { Id: CustomerID }, function (data) {
-                if (data) {
-                    oTable = $('#agreementList').DataTable();
-                    oTable.draw();
+                if (data.success) {
+                    LoadAgreementData();
                 } else {
                     alert("Something Went Wrong!");
                 }
@@ -134,7 +178,8 @@
             }
 
             function LoadProduct() {
-                $.get("Home/GetProductListByGroupId?groupId=1").done(function (data) {
+                var goupId = $("#ProductGroupId").val();
+                $.get("Home/GetProductListByGroupId?groupId=" + goupId).done(function (data) {
                     $('#ProductId').empty();
                     for (var i = 0; i < data.availableproduct.length; ++i) {
                         $('#ProductId').closest('select').append($('<option value="' + data.availableproduct[i].value + '">' + data.availableproduct[i].text + '</option>'));
@@ -142,7 +187,6 @@
                     $('#ProductId').closest('select').trigger("chosen:updated");
                 });
             }
-
         </script>
     }
 }

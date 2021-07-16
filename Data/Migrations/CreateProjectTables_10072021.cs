@@ -65,6 +65,7 @@ namespace AgreementManagement.Data.Migrations
                     ExpirationDate = table.Column<DateTime>(nullable: false),
                     ProductPrice = table.Column<decimal>(nullable: false),
                     NewPrice = table.Column<decimal>(nullable: false),
+                    Active = table.Column<bool>(nullable: false),
                 },
                 constraints: table =>
                 {

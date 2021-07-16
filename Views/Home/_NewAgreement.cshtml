@@ -1,76 +1,73 @@
 ﻿@model AgreementModel
 
-<div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">Add Edit Agreement</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<form asp-controller="Home" asp-action="NewAgreement" method="post">
-    <div class="modal-body">
-        <div class="row">
-            <div class="col-md-12">
-                @Html.HiddenFor(model => model.Id)
-                @Html.HiddenFor(model => model.UserId)
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <label asp-for="ProductGroupId" class="control-label"></label>
-                    </div>
-                    <div class="col-md-9">
-                        <select asp-for="ProductGroupId" asp-items="Model.AvailableProductGroup" class="form-control" onchange="LoadProduct()"></select>
-                        <span asp-validation-for="ProductGroupId" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <label asp-for="ProductId" class="control-label"></label>
-                    </div>
-                    <div class="col-md-9">
-                        <select asp-for="ProductId" asp-items="Model.AvailableProduct" class="form-control"></select>
-                        <span asp-validation-for="ProductId" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <label asp-for="EffectiveDate" class="control-label"></label>
-                    </div>
-                    <div class="col-md-9">
-                        <input asp-for="EffectiveDate" class="form-control" />
-                        <span asp-validation-for="EffectiveDate" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <label asp-for="ExpirationDate" class="control-label"></label>
-                    </div>
-                    <div class="col-md-9">
-                        <input asp-for="ExpirationDate" class="form-control" />
-                        <span asp-validation-for="ExpirationDate" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <div class="col-md-3">
-                        <label asp-for="NewPrice" class="control-label"></label>
-                    </div>
-                    <div class="col-md-9">
-                        <input asp-for="NewPrice" class="form-control" />
-                        <span asp-validation-for="NewPrice" class="text-danger"></span>
-                    </div>
-                </div>
 
+<div class="row">
+    <div class="col-md-12">
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.UserId)
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="ProductGroupId" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <select asp-for="ProductGroupId" asp-items="Model.AvailableProductGroup" class="form-control" onchange="LoadProduct()" required></select>
+                <div class="invalid-feedback">
+                    Please select product group
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="ProductId" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <select asp-for="ProductId" asp-items="Model.AvailableProduct" class="form-control" required></select>
+                <div class="invalid-feedback">
+                    Please select product
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="EffectiveDate" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="EffectiveDate" class="form-control" required />
+                <div class="invalid-feedback">
+                    Invalied effactive date
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="ExpirationDate" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="ExpirationDate" class="form-control" required />
+                <div class="invalid-feedback">
+                    Invalied effactive date
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="NewPrice" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="NewPrice" class="form-control" required />
+                <div class="invalid-feedback">
+                    Please enter new price
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label asp-for="Active" class="control-label"></label>
+            </div>
+            <div class="col-md-9">
+                <input asp-for="Active" />
             </div>
         </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-    </div>
-</form>
-
-
-@section Scripts {
-
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
-}
+</div>

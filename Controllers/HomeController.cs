@@ -92,7 +92,7 @@ namespace AgreementManagement.Controllers
             availableproduct.Add(new SelectListItem()
             {
                 Text = "--SELECT--",
-                Value = "0"
+                Value = ""
             });
 
             foreach (var product in products)
@@ -117,22 +117,32 @@ namespace AgreementManagement.Controllers
         public async Task<IActionResult> AgreementList()
         {
             var user = await _userManager.GetUserAsync(User);
-            var model = await _agreementFactory.PrepareAgreementModelsList(user.Id.ToString());
-            var jsonData = new
+            if (user != null)
             {
-                data = model
-            };
-            return Json(jsonData);
+                var model = await _agreementFactory.PrepareAgreementModelsList(user.Id.ToString());
+                var jsonData = new
+                {
+                    data = model
+                };
+                return Json(jsonData);
+            }
+            return Json("");
         }
 
-        public async Task<IActionResult> NewAgreement()
+        public async Task<IActionResult> AddEditAgreement(int id = 0)
         {
             var user = await _userManager.GetUserAsync(User);
 
-            var model = await _agreementFactory.PrepareAgreementModel(null, null, user.Id.ToString());
+            var model = new AgreementModel();
+            if (id == 0)
+                model = await _agreementFactory.PrepareAgreementModel(null, null, user.Id.ToString());
+            else
+            {
+                var agreement = await _agreementService.GetAgreementById(id);
+                model = await _agreementFactory.PrepareAgreementModel(null, agreement, user.Id.ToString());
+            }
 
             return PartialView("_NewAgreement", model);
-            //return Json(new{html = await RenderPartialViewToStringAsync("_NewAgreement", model) });
 
         }
 
@@ -143,21 +153,39 @@ namespace AgreementManagement.Controllers
             if (ModelState.IsValid)
             {
                 var product = await _productService.GetProductsById(model.ProductId);
-                var agreement = new Agreement()
+                if (model.Id == 0)
                 {
-                    UserId = user.Id.ToString(),
-                    ProductGroupId = model.ProductGroupId,
-                    ProductId = model.ProductId,
-                    EffectiveDate = model.EffectiveDate,
-                    ExpirationDate = model.ExpirationDate,
-                    ProductPrice = product != null ? product.Price : 0,
-                    NewPrice = model.NewPrice
-                };
-                await _agreementService.InsertAgreement(agreement);
+                    var agreement = new Agreement()
+                    {
+                        UserId = user.Id.ToString(),
+                        ProductGroupId = model.ProductGroupId,
+                        ProductId = model.ProductId,
+                        EffectiveDate = model.EffectiveDate,
+                        ExpirationDate = model.ExpirationDate,
+                        ProductPrice = product != null ? product.Price : 0,
+                        NewPrice = model.NewPrice,
+                        Active = model.Active
+                    };
+                    await _agreementService.InsertAgreement(agreement);
+                }
+                else
+                {
+                    var agreement = await _agreementService.GetAgreementById(model.Id);
+                    agreement.ProductGroupId = model.ProductGroupId;
+                    agreement.ProductId = model.ProductId;
+                    agreement.EffectiveDate = model.EffectiveDate;
+                    agreement.ExpirationDate = model.ExpirationDate;
+                    agreement.ProductPrice = product != null ? product.Price : 0;
+                    agreement.NewPrice = model.NewPrice;
+                    agreement.Active = model.Active;
+
+                    await _agreementService.UpdateAgreement(agreement);
+                }
+
+                //return Json(new { success = true });
             }
 
-            model = await _agreementFactory.PrepareAgreementModel(model, null, user.Id.ToString());
-            return View(model);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -168,7 +196,7 @@ namespace AgreementManagement.Controllers
             {
                 await _agreementService.DeleteAgreement(agreement);
             }
-            return Json(new { data = agreement });
+            return Json(new { success = true });
         }
 
         public IActionResult Privacy()

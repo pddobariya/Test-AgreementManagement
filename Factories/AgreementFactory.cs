@@ -43,7 +43,7 @@ namespace AgreementManagement.Factories
             availableGrouo.Add(new SelectListItem()
             {
                 Text = "--SELECT--",
-                Value = "0"
+                Value = ""
             });
             foreach (var pGroup in pGroups)
             {
@@ -65,7 +65,7 @@ namespace AgreementManagement.Factories
             availableproduct.Add(new SelectListItem()
             {
                 Text = "--SELECT--",
-                Value = "0"
+                Value = ""
             });
             foreach (var product in products)
             {
@@ -105,7 +105,8 @@ namespace AgreementManagement.Factories
                     ProductId = agreement.ProductId,
                     EffectiveDate = agreement.EffectiveDate,
                     ExpirationDate = agreement.ExpirationDate,
-                    NewPrice = agreement.ProductPrice
+                    NewPrice = agreement.NewPrice,
+                    Active = agreement.Active
                 };
 
                 model.AvailableProductGroup = await PrepareProductGroupList(agreement.ProductGroupId);
@@ -131,8 +132,9 @@ namespace AgreementManagement.Factories
                     ProductId = agreement.ProductId,
                     EffectiveDate = agreement.EffectiveDate,
                     ExpirationDate = agreement.ExpirationDate,
-                    NewPrice = agreement.ProductPrice,
-                    ProductPrice = product.Price,
+                    NewPrice = agreement.NewPrice,
+                    ProductPrice = agreement.ProductPrice,
+                    Active = agreement.Active,
 
                     ProductName = product.ProductNumber,
                     ProductGroupName = productGroup.GroupCode

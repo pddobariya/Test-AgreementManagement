@@ -4,11 +4,14 @@ using AgreementManagement.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace AgreementManagement
 {
@@ -36,13 +39,21 @@ namespace AgreementManagement
             services.AddTransient<IProductGroupService, ProductGroupService>();
             services.AddTransient<IProductService, ProductService>();
             services.AddTransient<IAgreementService, AgreementService>();
-            
+
             // Add application factories
             services.AddTransient<IAgreementFactory, AgreementFactory>();
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US");
+                options.SupportedCultures = new List<CultureInfo> { new CultureInfo("en-US") };
+            });
+            
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env,IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -72,6 +83,8 @@ namespace AgreementManagement
             });
 
             serviceProvider.GetService<ApplicationDbContext>().Database.Migrate();
+            
+
         }
     }
 }

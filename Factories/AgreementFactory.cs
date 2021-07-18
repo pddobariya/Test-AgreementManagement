@@ -8,11 +8,12 @@ using System;
 
 namespace AgreementManagement.Factories
 {
+
     public interface IAgreementFactory
     {
         Task<AgreementModel> PrepareAgreementModel(AgreementModel model, Agreement agreement, string userId);
 
-        Task<List<AgreementModel>> PrepareAgreementModelsList(string userId);
+        Task<(int recordsTotal,IList<AgreementModel> agreementModels)> PrepareAgreementModelsList(AgreementSearchModel agreementSearchModel);
     }
 
     public class AgreementFactory : IAgreementFactory
@@ -32,6 +33,8 @@ namespace AgreementManagement.Factories
             _productService = productService;
             _agreementService = agreementService;
         }
+
+        
         #endregion
 
         #region Utilities
@@ -78,6 +81,8 @@ namespace AgreementManagement.Factories
             }
             return availableproduct;
         }
+
+        
         #endregion
 
         #region Methods
@@ -89,8 +94,8 @@ namespace AgreementManagement.Factories
             {
                 if (model == null)
                     model = new AgreementModel();
-                model.EffectiveDate = DateTime.UtcNow.Date;
-                model.ExpirationDate = DateTime.UtcNow.Date;
+                model.EffectiveDate = DateTime.Now;
+                model.ExpirationDate = DateTime.Now;
                 model.AvailableProductGroup = await PrepareProductGroupList();
                 model.AvailableProduct= await PrepareProductList(0);
 
@@ -116,12 +121,12 @@ namespace AgreementManagement.Factories
             return model;
         }
 
-        public async Task<List<AgreementModel>> PrepareAgreementModelsList(string userId)
+        public async Task<(int recordsTotal, IList<AgreementModel> agreementModels)> PrepareAgreementModelsList(AgreementSearchModel agreementSearchModel)
         {
-            var agreements = await _agreementService.GetAgreementByUserId(userId);
+            var data = await _agreementService.GetAgreementByUserId(agreementSearchModel);
 
             var agreementModel = new List<AgreementModel>();
-            foreach (var agreement in agreements)
+            foreach (var agreement in data.Agreement)
             {
                 var product = await _productService.GetProductsById(agreement.ProductId);
                 var productGroup = await _productGroupService.GetProductGroupById(agreement.ProductGroupId);
@@ -140,7 +145,7 @@ namespace AgreementManagement.Factories
                     ProductGroupName = productGroup.GroupCode
                 });
             }
-            return agreementModel;
+            return (data.recordsTotal, agreementModel);
         }
         #endregion
     }

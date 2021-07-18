@@ -15,6 +15,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace AgreementManagement.Controllers
 {
@@ -117,16 +118,29 @@ namespace AgreementManagement.Controllers
         public async Task<IActionResult> AgreementList()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+
+            var draw = HttpContext.Request.Form["draw"].FirstOrDefault();
+            var start = Request.Form["start"].FirstOrDefault();
+            var length = Request.Form["length"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = length != null ? Convert.ToInt32(length) : 0;
+            int skip = start != null ? Convert.ToInt32(start) : 0;
+            
+            var searchModel = new AgreementSearchModel()
             {
-                var model = await _agreementFactory.PrepareAgreementModelsList(user.Id.ToString());
-                var jsonData = new
-                {
-                    data = model
-                };
-                return Json(jsonData);
-            }
-            return Json("");
+                UserId = user.Id.ToString(),
+                SortColumn = sortColumn,
+                SortColumnDirection = sortColumnDirection,
+                SearchValue = searchValue,
+                PageSize = pageSize,
+                Skip = skip
+            };
+            var customerData = await _agreementFactory.PrepareAgreementModelsList(searchModel);
+
+            //Returning Json Data  
+            return Json(new { draw = draw, recordsFiltered = customerData.recordsTotal, recordsTotal = customerData.recordsTotal, data = customerData.agreementModels });
         }
 
         public async Task<IActionResult> AddEditAgreement(int id = 0)

@@ -98,6 +98,57 @@ namespace AgreementManagement.Data.Migrations
             migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description31", "P-5", 21, true });
             migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description32", "P-6", 22, true });
             migrationBuilder.InsertData(table: "Product", columns: new[] { "ProductGroupId", "ProductDescription", "ProductNumber", "Price", "Active" }, values: new object[] { 3, "Product description33", "P-7", 23, true });
+
+            var sp = @"CREATE PROCEDURE SearchAgreement
+                    (
+	                    @USERId NVARCHAR(max) = '',
+	                    @SearchValue NVARCHAR(max) = '',
+	                    @SortColumn NVARCHAR(100) ='',
+	                    @SortColumnDirection NVARCHAR(100) ='',
+	                    @Skip INT =0,
+	                    @PageSize INT=10
+                    )
+                    AS
+                    BEGIN
+	                    DECLARE @SQL NVARCHAR(MAX)
+	                    IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'#tmpagreement')
+	                    BEGIN
+		                    DROP TABLE #tmpagreement
+	                    END
+
+	                    CREATE TABLE  #tmpagreement (Id int  NOT NULL identity(1,1), AgreementId int)
+	                    SET @SQL ='INSERT INTO #tmpagreement 
+	                    SELECT 
+		                    a.Id 
+	                    FROM Agreement a
+	                    INNER JOIN ProductGroup pg on pg.Id = a.ProductGroupId
+	                    INNER JOIN Product p on p.Id = a.ProductId
+	                    WHERE UserId = '''+@USERId+'''
+		                    AND (
+			                    ('''+@SearchValue+''' = '''' OR '''+ISNULL(@SearchValue,'')+''' IS NULL OR pg.GroupCode LIKE ''%'+@SearchValue+'%'' )
+			                    OR ('''+@SearchValue+''' = '''' OR '''+ISNULL(@SearchValue,'')+''' IS NULL OR p.ProductNumber LIKE ''%'+@SearchValue+'%'' ))'
+	                    if(@SortColumn != '' AND @SortColumnDirection != '')
+	                    BEGIN
+		                    SET @SQL = @SQL + ' ORDER BY '+@SortColumn + ' ' +@SortColumnDirection+''
+	                    END
+
+	                    EXEC(@SQL)
+
+	                    SELECT TOP(@PageSize)
+		                    a.* 
+	                    FROM Agreement a
+		                    INNER JOIN #tmpagreement tmp on a.Id = tmp.AgreementId
+		                    INNER JOIN ProductGroup pg on pg.Id = a.ProductGroupId
+		                    INNER JOIN Product p on p.Id = a.ProductId
+	                    WHERE tmp.Id > @Skip
+	                    ORDER BY tmp.Id
+
+	                    DROP TABLE #tmpagreement
+                    END
+                    GO
+                ";
+
+            migrationBuilder.Sql(sp);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

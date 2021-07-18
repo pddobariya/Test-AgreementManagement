@@ -33,7 +33,7 @@
                             <div class="col-sm-12 col-md-12 col-xs-12">
                                 <div class="float-right">
                                     <button type="button" class="btn btn-secondary rounded-0" data-dismiss="modal">Close</button>
-                                    <button class="btn btn-primary rounded-0" type="submit">Save</button>
+                                    <button id="btnSave" class="btn btn-primary rounded-0" type="submit">Save</button>
                                 </div>
                             </div>
                         </div>
@@ -43,22 +43,28 @@
         </div>
     </div>
 
-    <table id="agreementList" class="table table-striped table-bordered" width="100%" cellspacing="0">
-        <thead>
-            <tr>
-                <th>ProductGroupName</th>
-                <th>ProductName</th>
-                <th>EffectiveDate</th>
-                <th>ExpirationDate</th>
-                <th>ProductPrice</th>
-                <th>NewPrice</th>
-                <th>Active</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-    </table>
+    <div class="container">
+        <br />
+        <table id="agreementList" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ProductGroupName1</th>
+                    <th>ProductName</th>
+                    <th>EffectiveDate</th>
+                    <th>ExpirationDate</th>
+                    <th>ProductPrice</th>
+                    <th>NewPrice</th>
+                    <th>Active</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
     @section scripts{
+
         <script>
             (function () {
                 'use strict';
@@ -75,13 +81,13 @@
             })();
 
 
+
             function ShowPopup(id) {
                 $.ajax(
                     {
                         type: "GET",
                         url: "Home/AddEditAgreement?id="+id,
                         success: function (response) {
-                            debugger;
                             $('#modal-create-edit-user').find("#modal-aggrement").html(response);
                             $('#modal-create-edit-user').modal("show");
                         },
@@ -96,65 +102,68 @@
                     $('#agreementList').DataTable().clear().destroy();
                 }
                 $('#agreementList').DataTable({
-                    "sPaginationType": "full_numbers",
-                    "bProcessing": true,
-                    "sAjaxSource": "/Home/AgreementList",
-                    aoColumns: [
-                        { "data": "productGroupName", "sClass": "text-center", "sWidth": "10%" },
-                        { "data": "productName", "sClass": "text-center", "sWidth": "10%" },
+                    "processing": true, // for show progress bar
+                    "serverSide": true, // for process server side
+                    "filter": true, // this is for disable filter (search box)
+                    "orderMulti": false, // for disable multiple column at once
+                    "ajax": {
+                        "url": "/Home/AgreementList",
+                        "type": "POST",
+                        "datatype": "json"
+                    },
+                    "columnDefs": [{
+                        "targets": [0],
+                        "visible": false,
+                        "searchable": false
+                    }],
+                    "columns": [
+                        { "data": "productGroupName", "name": "GroupCode", "autoWidth": true },
+                        { "data": "productGroupName", "name": "GroupCode", "autoWidth": true },
+                        { "data": "productName", "name": "ProductNumber", "autoWidth": true },
                         {
-                            "data": "effectiveDate", "sClass": "text-center", "sWidth": "10%",
-                            "mRender": function (data) {
+                            "data": "effectiveDate", "name": "effectiveDate", "autoWidth": true,
+                            "render": function (data) {
                                 var date = new Date(data);
                                 var month = date.getMonth() + 1;
                                 return (month.length > 1 ? month : "0" + month) + "/" + date.getDate() + "/" + date.getFullYear();
                             }
                         },
                         {
-                            "data": "expirationDate", "sClass": "text-center", "sWidth": "10%",
-                            "mRender": function (data) {
+                            "data": "expirationDate", "name": "expirationDate", "autoWidth": true,
+                            "render": function (data) {
                                 var date = new Date(data);
                                 var month = date.getMonth() + 1;
                                 return (month.length > 1 ? month : "0" + month) + "/" + date.getDate() + "/" + date.getFullYear();
                             }
                         },
-                        { "data": "productPrice", "sClass": "text-center", "sWidth": "10%" },
-                        { "data": "newPrice", "sClass": "text-center", "sWidth": "10%" },
+                        { "data": "productPrice", "name": "productPrice", "autoWidth": true },
+                        { "data": "newPrice", "name": "newPrice", "autoWidth": true },
                         {
-                            "data": "active", "sClass": "text-center", "sWidth": "10%",
-                            "bSearchable": false,
-                            "bSortable": false,
-                            "mRender": function (data, type, full) {
-                                var active = full["active"];
-                                str = '<p><i class="fa fa-check" aria-hidden="true"></i></p>'
-                                if (!active) {
-                                    str = '<p><i class="fa fa-times" aria-hidden="true"></i></p>'
+                            "data": "active", "name": "Active", "autoWidth": true,
+                            "sortable": false,
+                            "render": function (data, type, full, meta) {
+                                str = '<p><i class="fa fa-times" aria-hidden="true"></i></p>'
+                                if (full.active) {
+                                    str = '<p><i class="fa fa-check" aria-hidden="true"></i></p>'
                                 }
                                 return str;
                             }
                         },
                         {
-                            "bSearchable": false,
-                            "bSortable": false,
-                            "sClass": "text-center",
-                            "sWidth": "10%",
-                            "mRender": function (data, type, full) {
-                                var id = full["id"];
-                                str = '<a onclick="ShowPopup(' + id + ')" class="btn btn-primary popup" data-toggle="modal" data-target="#modal-create-edit-user">Edit</a>'
+                            "sortable": false,
+                            "render": function (data, type, full, meta) {
+                                str = '<a onclick="ShowPopup(' + full.id + ')" class="btn btn-primary popup" data-toggle="modal" data-target="#modal-create-edit-user">Edit</a>'
                                 return str;
                             }
                         },
                         {
-                            "bSearchable": false,
-                            "bSortable": false,
-                            "sClass": "text-center",
-                            "sWidth": "10%",
-                            "mRender": function (data, type, full) {
-                                var id = full["id"];
-                                str = '<a class="btn btn-danger" href="#" onclick=DeleteData("' + id + '");>Delete</a>';
+                            data: null,
+                            "sortable": false,
+                            render: function (data, type, full, meta) {
+                                str = '<a class="btn btn-danger" href="#" onclick=DeleteData("' + full.id + '");>Delete</a>';
                                 return str;
                             }
-                        }
+                        },
                     ]
                 });
             }

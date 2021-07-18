@@ -1,4 +1,5 @@
 ﻿using AgreementManagement.Domain;
+using AgreementManagement.Models.Agreements;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,6 +15,6 @@ namespace AgreementManagement.Services
 
         Task<Agreement> GetAgreementById(int id);
 
-        Task<List<Agreement>> GetAgreementByUserId(string userId);
+        Task<(int recordsTotal, IList<Agreement> Agreement)> GetAgreementByUserId(AgreementSearchModel agreementSearchModel);
     }
 }
